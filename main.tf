@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.70.0" # Example: compatible with versions >= 5.0 and < 6.0
+    }
+  }
+}
+
 provider "aws" {
   region = "us-east-1"
 }
@@ -22,7 +31,7 @@ Resources:
   MyStackSetBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub "stackset-shared-bucket-${AWS::AccountId}-${AWS::Region}"
+      BucketName: !Sub "stackset-shared-bucket-$${AWS::AccountId}-$${AWS::Region}"
 
   MyStackSetRole:
     Type: AWS::IAM::Role
@@ -63,17 +72,17 @@ data "aws_organizations_organization" "org" {}
 # }
 
 resource "aws_cloudformation_stack_set_instance" "deploy_to_accounts" {
-    deployment_targets {
-        account_filter_type = "DIFFERENCE"
-        accounts = var.excluded_accounts
-        organizational_unit_ids = [data.aws_organizations_organization.root[0].root[0].id]
-    }
+  deployment_targets {
+    account_filter_type     = "DIFFERENCE"
+    accounts                = var.excluded_accounts
+    organizational_unit_ids = [data.aws_organizations_organization.root[0].root[0].id]
+  }
 
-    operational_preferences {
-        failure_tolerance_count = 24
-        max_concurrent_count = 25
-        region_concurrency_type = "PARALLEL"
-    }
-    stack_set_name  = aws_cloudformation_stack_set.s3_iam_stackset.name
-    region          = "us-east-1"
+  operation_preferences {
+    failure_tolerance_count = 24
+    max_concurrent_count    = 25
+    region_concurrency_type = "PARALLEL"
+  }
+  stack_set_name = aws_cloudformation_stack_set.s3_iam_stackset.name
+  region         = "us-east-1"
 }
