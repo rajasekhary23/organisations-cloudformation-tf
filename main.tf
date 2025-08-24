@@ -75,7 +75,7 @@ resource "aws_cloudformation_stack_set_instance" "deploy_to_accounts" {
   deployment_targets {
     account_filter_type     = "DIFFERENCE"
     accounts                = var.excluded_accounts
-    organizational_unit_ids = [data.aws_organizations_organization.root[0].root[0].id]
+    organizational_unit_ids = [data.aws_organizations_organization.org[0].roots[0].id]
   }
 
   operation_preferences {
