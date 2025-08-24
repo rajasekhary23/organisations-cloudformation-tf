@@ -52,6 +52,13 @@ EOT
 # 🔹 StackSet instances (deploy to OU but exclude 2 accounts)
 # Terraform does NOT support exclusion directly like CLI,
 # so you simulate it by explicitly targeting all accounts in the OU except the excluded ones.
+variable "has_excluded_accounts" {
+  default = false
+}
+
+variable "has_no_excluded_accounts" {
+  default = true
+}
 
 variable "excluded_accounts" {
   default = ["111111111111", "222222222222"]
@@ -74,9 +81,26 @@ data "aws_organizations_organization" "org" {
 # }
 
 resource "aws_cloudformation_stack_set_instance" "deploy_to_accounts" {
+    count = var.has_excluded_accounts ? 1 : 0
   deployment_targets {
     account_filter_type     = "DIFFERENCE"
     accounts                = var.excluded_accounts
+    organizational_unit_ids = [data.aws_organizations_organization.org[0].roots[0].id]
+  }
+
+  operation_preferences {
+    failure_tolerance_count = 24
+    max_concurrent_count    = 25
+    region_concurrency_type = "PARALLEL"
+  }
+  stack_set_name = aws_cloudformation_stack_set.s3_iam_stackset.name
+  region         = "us-east-1"
+}
+
+
+resource "aws_cloudformation_stack_set_instance" "deploy_to_accounts" {
+    count = var.has_excluded_accounts ? 1 : 0
+  deployment_targets {
     organizational_unit_ids = [data.aws_organizations_organization.org[0].roots[0].id]
   }
 
