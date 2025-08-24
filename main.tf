@@ -80,7 +80,7 @@ data "aws_organizations_organization" "org" {
 #   ]
 # }
 
-resource "aws_cloudformation_stack_set_instance" "deploy_to_accounts" {
+resource "aws_cloudformation_stack_set_instance" "deploy_to_ou_with_excluded_accounts" {
     count = var.has_excluded_accounts ? 1 : 0
   deployment_targets {
     account_filter_type     = "DIFFERENCE"
@@ -98,8 +98,8 @@ resource "aws_cloudformation_stack_set_instance" "deploy_to_accounts" {
 }
 
 
-resource "aws_cloudformation_stack_set_instance" "deploy_to_accounts" {
-    count = var.has_excluded_accounts ? 1 : 0
+resource "aws_cloudformation_stack_set_instance" "deploy_to_all_ou_accounts" {
+    count = var.has_no_excluded_accounts ? 1 : 0
   deployment_targets {
     organizational_unit_ids = [data.aws_organizations_organization.org[0].roots[0].id]
   }
