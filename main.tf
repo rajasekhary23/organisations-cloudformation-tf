@@ -57,7 +57,9 @@ variable "excluded_accounts" {
   default = ["111111111111", "222222222222"]
 }
 
-data "aws_organizations_organization" "org" {}
+data "aws_organizations_organization" "org" {
+    count = 1
+}
 
 # Collect all accounts in org
 # data "aws_organizations_accounts" "all_accounts" {}
